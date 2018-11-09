@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
+import 'signupscreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() => runApp(new MyApp());
 
@@ -10,14 +12,14 @@ class MyApp extends StatelessWidget {
       title: 'Welcome to flutter...',
       home: new Scaffold(
         backgroundColor: Colors.amberAccent,
-        appBar: new AppBar(
-          title: const Text('LETsCHAT APP'),
-          backgroundColor: new Color(0xFFF83748),
-          centerTitle: true,
-          elevation: 16.7,
-          bottomOpacity: 117.0,
-
-        ),
+//        appBar: new AppBar(
+//          title: const Text('LETsCHAT APP'),
+//          backgroundColor: new Color(0xFFF83748),
+//          centerTitle: true,
+//          elevation: 16.7,
+//          bottomOpacity: 117.0,
+//
+//        ),
         body: new Center(
           child: new RandomWords(),
         ),
@@ -52,7 +54,7 @@ class RandomWordsState extends State<RandomWords>{
                     Image.asset('assets/diamond.png'),
                     SizedBox(height: 10.0),
                     Text('LETsCHAT', textScaleFactor: 3.0),
-                    SizedBox(height: 50.0),
+                    SizedBox(height: 40.0),
 
                     TextField(
                       controller: _usernameController,
@@ -76,7 +78,6 @@ class RandomWordsState extends State<RandomWords>{
                       ),
                       obscureText: true,
                     ),
-//                    SizedBox(height: 20.0,),
                   ],
                 ),
                 ButtonBar(
@@ -92,13 +93,14 @@ class RandomWordsState extends State<RandomWords>{
                   child: Text('NEXT'),
                   color: new Color(0xFFFBB8AC),
                   elevation: 5.0,
-                  onPressed: () {
+                  onPressed: () async{
 //                    Navigator.pop(context);
-                    if(_usernameController.text == 'admin' && _passwordController.text == 'admin') {
+                  final result = await Firestore.instance.collection('users').document(_usernameController.text).get();
+                    if(result.exists && _usernameController.text == result.data['username'] && _passwordController.text == result.data['password']) {
                       Navigator.push(context, MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return Scaffold(
-                              body: new NextPage(),
+                              body: new NextPage(_usernameController.text),
                             );
                           }
                       ));
@@ -127,7 +129,32 @@ class RandomWordsState extends State<RandomWords>{
                 },
                 ),
               ],
-        )
+        ),
+                ButtonBar(
+                  alignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RaisedButton(
+                  child: Text('CREATE NEW ACCOUNT'),
+                  color: Colors.greenAccent,
+                  elevation: 5.0,
+                  onPressed: (){
+                    Navigator.push(context, MaterialPageRoute<void>(
+                        builder: (BuildContext context){
+                      return new Scaffold(
+                        appBar: new AppBar(
+                          title: new Text('CREATE NEW ACCOUNT'),
+                          backgroundColor: Colors.deepOrange,
+                        ),
+                        body: new signup(),
+                      );
+                    }
+                        ),
+                    );
+                  },
+
+                ),
+                  ],
+                )
     ]
         ),
       )
